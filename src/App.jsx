@@ -1,8 +1,9 @@
-import React from 'react';
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
+
+// ✅ Backend URL from .env file
+const backendBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 function WhiteCopyEnterprises() {
   const [clients, setClients] = useState([]);
@@ -20,9 +21,8 @@ function WhiteCopyEnterprises() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
-
   useEffect(() => {
-    fetch("http://localhost:3001/clients")
+    fetch(`${backendBaseUrl}/api/clients`)
       .then(res => res.json())
       .then(data => setClients(data))
       .catch(() => setError("Cannot reach backend server."));
@@ -34,7 +34,7 @@ function WhiteCopyEnterprises() {
       owed: Number(newClient.invoice) - Number(newClient.paid),
     };
 
-    fetch("https://white-copy-backend.onrender.com/clients", {
+    fetch(`${backendBaseUrl}/clients`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(clientData),
@@ -53,6 +53,7 @@ function WhiteCopyEnterprises() {
       })
       .catch(() => setError("Failed to add client."));
   };
+
   const handleDownloadInvoice = (client) => {
     const doc = new jsPDF();
     doc.setFontSize(16);
@@ -68,14 +69,14 @@ function WhiteCopyEnterprises() {
     doc.text(`M-Pesa Paybill: 0720248732`, 20, 120);
     doc.save(`${client.name}_invoice.pdf`);
   };
+
   const handleExportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(clients);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
     XLSX.writeFile(workbook, "White_Copy_Clients.xlsx");
   };
-  
-  
+
   if (!isLoggedIn) {
     return (
       <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
@@ -99,7 +100,7 @@ function WhiteCopyEnterprises() {
       </div>
     );
   }
-  
+
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
       <h1>White Copy Enterprises</h1>
@@ -140,28 +141,26 @@ function WhiteCopyEnterprises() {
           </tr>
         </thead>
         <tbody>
-        {clients
-          .filter(client =>
-            client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            client.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            String(client.owed).includes(searchTerm)
-          )
-          .map((client, index) => (
-
-            <tr key={index}>
-              <td>{client.name}</td>
-              <td>{client.service}</td>
-              <td>{client.invoice}</td>
-              <td>{client.paid}</td>
-              <td>{client.owed}</td>
-              <td>{client.ordered}</td>
-              <td>{client.delivery}</td>
-              <td>
-              <button onClick={() => handleDownloadInvoice(client)}>Download</button>
-              </td>
-
-            </tr>
-          ))}
+          {clients
+            .filter(client =>
+              client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              client.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              String(client.owed).includes(searchTerm)
+            )
+            .map((client, index) => (
+              <tr key={index}>
+                <td>{client.name}</td>
+                <td>{client.service}</td>
+                <td>{client.invoice}</td>
+                <td>{client.paid}</td>
+                <td>{client.owed}</td>
+                <td>{client.ordered}</td>
+                <td>{client.delivery}</td>
+                <td>
+                  <button onClick={() => handleDownloadInvoice(client)}>Download</button>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
@@ -169,19 +168,3 @@ function WhiteCopyEnterprises() {
 }
 
 export default WhiteCopyEnterprises;
-
-const downloadInvoice = (client) => {
-  const doc = new jsPDF();
-
-  doc.setFontSize(16);
-  doc.text('White Copy Enterprises - Invoice', 20, 20);
-  doc.setFontSize(12);
-  doc.text(`Client: ${client.name}`, 20, 40);
-  doc.text(`Service: ${client.service}`, 20, 50);
-  doc.text(`Invoice Amount: KES ${client.invoice}`, 20, 60);
-  doc.text(`Amount Paid: KES ${client.paid}`, 20, 70);
-  doc.text(`Balance: KES ${client.owed}`, 20, 80);
-  doc.text(`M-Pesa Paybill: 0720248732`, 20, 100);
-
-  doc.save(`${client.name}-invoice.pdf`);
-};
