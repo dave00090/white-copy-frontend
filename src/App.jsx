@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
-// ✅ Backend URL from .env file
-const backendBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
 function WhiteCopyEnterprises() {
   const [clients, setClients] = useState([]);
   const [newClient, setNewClient] = useState({
@@ -21,8 +18,10 @@ function WhiteCopyEnterprises() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
+  const API_URL = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
-    fetch(`${backendBaseUrl}/api/clients`)
+    fetch(`${API_URL}/clients`)
       .then(res => res.json())
       .then(data => setClients(data))
       .catch(() => setError("Cannot reach backend server."));
@@ -34,7 +33,7 @@ function WhiteCopyEnterprises() {
       owed: Number(newClient.invoice) - Number(newClient.paid),
     };
 
-    fetch(`${backendBaseUrl}/clients`, {
+    fetch(`${API_URL}/clients`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(clientData),
