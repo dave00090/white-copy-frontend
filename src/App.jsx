@@ -21,7 +21,7 @@ function WhiteCopyEnterprises() {
   const API_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    fetch(`${API_URL}/clients`)
+    fetch("https://white-copy-backend-1.onrender.com/api/clients")
       .then(res => res.json())
       .then(data => setClients(data))
       .catch(() => setError("Cannot reach backend server."));
