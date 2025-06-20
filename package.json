@@ -1,7 +1,6 @@
 {
-  "name": "white-copy-frontend",
-  "version": "1.0.0",
-  "private": true,
+  "name": "frontend",
+  "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
